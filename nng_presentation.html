@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="author" content="Garrett D'Amore, Staysail Systems, Inc."><title>Scalability Protocols</title><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" name="viewport"><link href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/reveal.css" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/theme/black.css" id="theme"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"><style>.listingblock .pygments .hll { background-color: #ffffcc }
+.listingblock .pygments, .listingblock .pygments code { background: #f8f8f8; }
+.listingblock .pygments .tok-c { color: #408080; font-style: italic } /* Comment */
+.listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+.listingblock .pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */
+.listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.listingblock .pygments .tok-cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.listingblock .pygments .tok-cp { color: #BC7A00 } /* Comment.Preproc */
+.listingblock .pygments .tok-cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.listingblock .pygments .tok-c1 { color: #408080; font-style: italic } /* Comment.Single */
+.listingblock .pygments .tok-cs { color: #408080; font-style: italic } /* Comment.Special */
+.listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+.listingblock .pygments .tok-ge { font-style: italic } /* Generic.Emph */
+.listingblock .pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+.listingblock .pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.listingblock .pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+.listingblock .pygments .tok-go { color: #888888 } /* Generic.Output */
+.listingblock .pygments .tok-gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.listingblock .pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+.listingblock .pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.listingblock .pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+.listingblock .pygments .tok-kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.listingblock .pygments .tok-kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.listingblock .pygments .tok-kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.listingblock .pygments .tok-kp { color: #008000 } /* Keyword.Pseudo */
+.listingblock .pygments .tok-kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.listingblock .pygments .tok-kt { color: #B00040 } /* Keyword.Type */
+.listingblock .pygments .tok-m { color: #666666 } /* Literal.Number */
+.listingblock .pygments .tok-s { color: #BA2121 } /* Literal.String */
+.listingblock .pygments .tok-na { color: #7D9029 } /* Name.Attribute */
+.listingblock .pygments .tok-nb { color: #008000 } /* Name.Builtin */
+.listingblock .pygments .tok-nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.listingblock .pygments .tok-no { color: #880000 } /* Name.Constant */
+.listingblock .pygments .tok-nd { color: #AA22FF } /* Name.Decorator */
+.listingblock .pygments .tok-ni { color: #999999; font-weight: bold } /* Name.Entity */
+.listingblock .pygments .tok-ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.listingblock .pygments .tok-nf { color: #0000FF } /* Name.Function */
+.listingblock .pygments .tok-nl { color: #A0A000 } /* Name.Label */
+.listingblock .pygments .tok-nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.listingblock .pygments .tok-nt { color: #008000; font-weight: bold } /* Name.Tag */
+.listingblock .pygments .tok-nv { color: #19177C } /* Name.Variable */
+.listingblock .pygments .tok-ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.listingblock .pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+.listingblock .pygments .tok-mb { color: #666666 } /* Literal.Number.Bin */
+.listingblock .pygments .tok-mf { color: #666666 } /* Literal.Number.Float */
+.listingblock .pygments .tok-mh { color: #666666 } /* Literal.Number.Hex */
+.listingblock .pygments .tok-mi { color: #666666 } /* Literal.Number.Integer */
+.listingblock .pygments .tok-mo { color: #666666 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sa { color: #BA2121 } /* Literal.String.Affix */
+.listingblock .pygments .tok-sb { color: #BA2121 } /* Literal.String.Backtick */
+.listingblock .pygments .tok-sc { color: #BA2121 } /* Literal.String.Char */
+.listingblock .pygments .tok-dl { color: #BA2121 } /* Literal.String.Delimiter */
+.listingblock .pygments .tok-sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.listingblock .pygments .tok-s2 { color: #BA2121 } /* Literal.String.Double */
+.listingblock .pygments .tok-se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.listingblock .pygments .tok-sh { color: #BA2121 } /* Literal.String.Heredoc */
+.listingblock .pygments .tok-si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.listingblock .pygments .tok-sx { color: #008000 } /* Literal.String.Other */
+.listingblock .pygments .tok-sr { color: #BB6688 } /* Literal.String.Regex */
+.listingblock .pygments .tok-s1 { color: #BA2121 } /* Literal.String.Single */
+.listingblock .pygments .tok-ss { color: #19177C } /* Literal.String.Symbol */
+.listingblock .pygments .tok-bp { color: #008000 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-fm { color: #0000FF } /* Name.Function.Magic */
+.listingblock .pygments .tok-vc { color: #19177C } /* Name.Variable.Class */
+.listingblock .pygments .tok-vg { color: #19177C } /* Name.Variable.Global */
+.listingblock .pygments .tok-vi { color: #19177C } /* Name.Variable.Instance */
+.listingblock .pygments .tok-vm { color: #19177C } /* Name.Variable.Magic */
+.listingblock .pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */</style><link href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/css/zenburn.css" rel="stylesheet"><script>var link = document.createElement( 'link' );
+link.rel = 'stylesheet';
+link.type = 'text/css';
+link.href = window.location.search.match( /print-pdf/gi ) ? "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/pdf.css" : "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/paper.css";
+document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/html5shiv.js"></script><![endif]--><link rel="stylesheet" href="css/nng.css"></head><body><div class="reveal"><div class="slides"><section class="title" data-state="title"><h1>Scalability Protocols</h1><div class="preamble"><div class="paragraph"><p>(nanomsg, nng, mangos, and other critters)<br>
+February 13, 2018</p></div></div><p class="author"><small>Garrett D'Amore, Staysail Systems, Inc.</small></p></section>
+<section id="about_me"><h2>About Me</h2><div class="ulist"><ul><li><p><strong>Garrett D&#8217;Amore</strong><br></p></li><li><p>CTO &amp; Founder, Staysail Systems, Inc.<br></p></li><li><p>Founder of <a href="http://www.illumos.org">illumos</a><br></p></li><li><p>BDFL <em>nanomsg</em> &amp; creator of <em>nng</em>, <em>mangos</em><br></p></li></ul></div></section>
+<section id="scalability_protocols"><h2>Scalability Protocols</h2><div class="ulist"><ul><li><p>Light-weight messaging layer</p></li><li><p>Solves recurring messaging problems</p></li><li><p>Liberally licensed</p></li><li><p>Embeddable &amp; Portable (ANSI C)</p></li><li><p>Message-oriented</p></li><li><p>Brokerless</p></li></ul></div></section>
+<section><section id="alternatives"><h2>Alternatives</h2><div class="ulist"><ul><li><p>ZeroMQ</p></li><li><p>RabbitMQ</p></li><li><p>AMQP</p></li><li><p>MQTT</p></li><li><p>REST/HTTP</p></li><li><p>BSD sockets</p></li><li><p>Others&#8230;&#8203;</p></li></ul></div></section><section id="zeromq"><h2>ZeroMQ</h2><div class="paragraph"><p>Much has been written here.  Biggest turn offs to ZeroMQ
+are license and language, but some philosophical differences too.</p></div>
+<div class="paragraph"><p>See <a href="http://nanomsg.org/documentation-zeromq.html" class="bare">http://nanomsg.org/documentation-zeromq.html</a> for some of Martin&#8217;s
+orgiinal thoughts.</p></div>
+<aside class="notes"><div class="paragraph"><p>Philosophical ones involve OO based API, insufficient design for
+threading, interface stability, extensibility, and polling approach.
+nanomsg represents an effort by Martin to correct what he perceived as
+mistakes in ZeroMQ.  Recall he is the creator of both projects.</p></div></aside></section><section id="broker_based"><h2>Broker-based</h2><div class="ulist"><ul><li><p>RabbitMQ, AMQP require a broker, and a runtime (Java).</p></li></ul></div></section><section id="mqtt"><h2>MQTT</h2><div class="paragraph"><p>MQTT is newer than nanomsg or ZeroMQ, and is intended for IoT
+use cases.  It lacks most of the flexibility and power, and is a very
+simple PUB/SUB model (generally over TCP).</p></div></section><section id="rest_http_api"><h2>REST/HTTP API</h2><div class="paragraph"><p>REST (and HTTP) expreses the simple RPC style (REQ/REP) paradigm well.  It
+does not support other patterns, and lacks any notion
+of automatic retry, reconnect, etc.</p></div>
+<div class="paragraph"><p>HTTP can be useful with proxies to load-balance, etc. however.</p></div></section></section>
+<section id="sp_implementations"><h2>SP Implementations</h2><div class="ulist"><ul><li><p><a href="http://nanomsg.org">nanomsg</a> (original)</p></li><li><p><a href="https://github.com/go-mangos/mangos">mangos</a> (golang)</p></li><li><p><a href="https://nanomsg.github.com/nng">nng</a> (nanomsg-next-gen)</p></li><li><p><a href="https://github.com/blabaere/scaproust">scaporust</a> (rust)</p></li><li><p>Many language FFIs (wrappers)</p></li></ul></div></section>
+<section><section id="why"><h2>Why?</h2><div class="ulist"><ul><li><p>Developer friendly</p></li><li><p>Administrator friendly</p></li><li><p>Business friendly</p></li></ul></div></section><section id="buzzwords"><h2>Buzzwords</h2><div class="ulist"><ul><li><p>Brokerless</p></li><li><p>Lightweight</p></li><li><p>Securable</p></li><li><p>Reliable</p></li><li><p>Performant</p></li><li><p>Scalable</p></li></ul></div></section><section id="other_buzzwords"><h2>Other Buzzwords</h2><div class="ulist"><ul><li><p>Open Source</p></li><li><p>Observable (TBD)</p></li><li><p>Composable</p></li><li><p>Separation of Code &amp; Config</p></li></ul></div></section></section>
+<section><section id="broker_vs_brokerless"><h2>Broker vs. Brokerless</h2><table class="tableblock frame-all grid-all" style=""><colgroup><col><col><col></colgroup><thead><tr><th class="tableblock halign-left valign-top"></th><th class="tableblock halign-left valign-top">Broker</th><th class="tableblock halign-left valign-top">Brokerless</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Separate Daemon</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="green">No</span></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Runtime Requirements</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Usually</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="green">Rare</span></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Persistent State</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="red">No</span></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Database Required</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Frequently</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="green">No</span></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">Extra Administration</p></td><td class="tableblock halign-left valign-top"><p class="tableblock">Yes</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="green">Rarely</span></p></td></tr></table></section><section id="moral"><h2>Moral</h2><div class="paragraph"><p><em>If you absolutely need persistent state, a broker is required.
+For all other cases, brokerless is better.</em></p></div></section></section>
+<section id="light_weight"><h2>Light-weight</h2><div class="ulist"><ul><li><p>ANSI C</p><div class="ulist"><ul><li><p>Except <em>mangos</em> (golang) and <em>scaporust</em> (rust)</p></li><li><p><em>nng</em> uses C99</p></li></ul></div></li><li><p>Minimal <strong>optional</strong> external dependencies</p></li><li><p>Zero <strong>required</strong> external dependencies</p></li><li><p>Minimizable (<em>nng</em> only)</p></li></ul></div></section>
+<section id="optional_dependencies"><h2>Optional Dependencies</h2><div class="paragraph"><p>For <em>nng</em> only:</p></div>
+<div class="dlist"><dl><dt class="hdlist1">ARM mbedTLS</dt><dd><p>For TLS and wss transports.  Apache licensed.</p></dd><dt class="hdlist1">ZeroTierOne</dt><dd><p>For zt transport; GPL, dev branch only</p></dd></dl></div></section>
+<section id="minimizable"><h2>Minimizable</h2><div class="paragraph"><p>Every transport and every protocol can be disabled and omitted from
+the library.  Furthermore, vanilla HTTP and TLS support may be removed.</p></div></section>
+<section id="developer_friendly"><h2>Developer Friendly</h2><div class="ulist"><ul><li><p>Started with familiar POSIX API (send/recv, file descriptor based)</p><div class="ulist"><ul><li><p>Even POSIX API is sometimes inconvenient.</p></li><li><p>Socket options style API for tunables.</p></li></ul></div></li><li><p>Free developer from managing connections, reconnects, retries, etc.</p></li><li><p>Addresses are just URLs</p></li></ul></div></section>
+<section id="administrator_friendly"><h2>Administrator Friendly</h2><div class="ulist"><ul><li><p>Brokerless!</p></li><li><p>No external runtime or other dependencies</p><div class="ulist"><ul><li><p>Except for optional ZeroTier or mbedTLS (<em>nng</em>)</p></li></ul></div></li><li><p>Device API supports proxies, concentrators, etc.</p></li><li><p>URL configuration for endpoint addresses</p><div class="ulist"><ul><li><p>Some transports need extra config</p></li></ul></div></li><li><p>Designed for scalability</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>We are looking at ways to handle configuration apart from code for
+things like security certificates.  Configuration files, environment
+variables, and similar are being explored.</p></div></aside></section>
+<section id="business_friendly"><h2>Business Friendly</h2><div class="ulist"><ul><li><p>Liberal (MIT) license</p></li><li><p>mbedTLS dependency uses Apache license</p></li><li><p>No other dependencies</p></li><li><p>Commercial support available</p></li><li><p>Commercially sponsored</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>Apache license is generally considered liberal.  ZeroTier&#8217;s GPL
+license can be problematic for embedded use cases, etc.</p></div>
+<div class="paragraph"><p>Remember that one of the motivations behind <em>nanomsg</em> was that
+ZeroMQ&#8217;s GPL license is deemed too onerous for many applications.</p></div></aside></section>
+<section id="securable_nng"><h2>Securable (nng)</h2><div class="ulist"><ul><li><p>TLSv1.2 support availble (both TCP and websocket)</p></li><li><p><a href="https://zerotier.com">ZeroTier</a> (!) for <em>nng</em></p></li><li><p>Hardened against DoS and other protocol attacks</p></li><li><p>Different transport options provide flexibility</p></li><li><p>Device proxies</p><div class="ulist"><ul><li><p>Hardened exterior</p></li><li><p>Inspectable interior</p></li></ul></div></li></ul></div></section>
+<section id="reliable"><h2>Reliable</h2><div class="ulist"><ul><li><p>Never assert except on gross programmer error</p></li><li><p>All system call return codes checked</p></li><li><p>Built-in retries &amp; reconnects</p></li><li><p>Brokerless (no broker to fail)</p></li><li><p>Multipath capable</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>The first two of these are applicable only to <em>nng</em>.</p></div></aside></section>
+<section id="performant"><h2>Performant</h2><div class="ulist"><ul><li><p>Optimal use of OS facilities</p></li><li><p>Tunables (throughput vs latency)</p></li><li><p>Nagle (on or off)</p></li><li><p>Buffer loaning to reduce data copies</p></li><li><p>Minimal use of extra system calls</p></li><li><p>No premature optimization</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>We know of people using this to coordinate FIX trading for "high frequency"
+currency trading.  Rationale here is reduced latency.</p></div>
+<div class="paragraph"><p>Nagle almost never makes sense in an SP topology; but we really need
+good scatter/gather support to keep single messages in the same
+TCP segment.  This is one area where mangos / golang suffers.</p></div></aside></section>
+<section id="scalable"><h2>Scalable</h2><div class="ulist"><ul><li><p>Thread scaling to utilize multiple cores</p></li><li><p>Designed to support system aware pollers (kqueue, epoll, IOCP, etc.)</p></li><li><p>C10K capable (tested) (<em>nng</em>, <em>mangos</em>)</p></li><li><p>Device framework (horizontal scaling)</p></li><li><p><em>nng</em> already outperforms <em>libnanomsg</em> (Win32)</p></li></ul></div></section>
+<section id="transports"><h2>Transports</h2><div class="ulist"><ul><li><p>TCP</p></li><li><p>IPC</p></li><li><p>inproc</p></li><li><p>websocket (with TLS on <em>mangos</em> and <em>nng</em>)</p></li><li><p>TLS (<em>mangos</em> and <em>nng</em> only)</p></li><li><p>ZeroTier (<em>nng</em> only)</p></li><li><p>QUIC (3rd party developed, mangos only)</p></li><li><p>UDP, KCP&#8230;&#8203;. others proposed</p></li></ul></div></section>
+<section id="patterns_protocols"><h2>Patterns (Protocols)</h2><div class="ulist"><ul><li><p>Req/Rep</p></li><li><p>Pub/Sub</p></li><li><p>Bus</p></li><li><p>Pipeline (Push/Pull)</p></li><li><p>Survey</p></li><li><p>Pair</p></li><li><p>Polyamorous Pair (<em>nng</em> only)</p></li><li><p>Star (<em>mangos</em> only)</p></li></ul></div></section>
+<section id="composable_architecture"><h2>Composable Architecture</h2><div class="ulist"><ul><li><p>"Device" layer</p></li><li><p>Acts like a proxy</p></li><li><p>Can cross transport boundaries</p></li><li><p>Can be concentrator</p></li><li><p>Transparent to applications</p></li></ul></div></section>
+<section><section id="history_lesson_101"><h2>History Lesson (101)</h2><div class="ulist"><ul><li><p>BSD sockets begat <em>ZeroMQ</em></p></li><li><p><em>ZeroMQ</em> begat <em>nanomsg</em></p></li><li><p><em>nanomsg</em> begat <em>mangos</em></p></li><li><p><em>mangos</em> begat <em>nng</em></p></li></ul></div></section><section id="history_301"><h2>History (301)</h2><div class="ulist"><ul><li><p>ZeroMQ&#8217;s use of GPL and C++ deemed distasteful.</p></li><li><p>ZeroMQ&#8217;s lack of thread-safety an inhibitor.</p></li><li><p>Martin Sustrik and Peter Hintjens had a falling out.</p></li></ul></div></section><section id="postmodern_history"><h2>PostModern History</h2><div class="ulist"><ul><li><p>Garrett wrote mangos</p></li><li><p>Martin lost interest</p></li><li><p>Garrett started maintaining</p></li><li><p>Garrett stepped away &#8230;&#8203; for a while</p></li><li><p>Garrett took back over as BDFL</p></li><li><p>Garrett started the <em>nng</em> effort</p></li></ul></div></section></section>
+<section id="mangos"><h2>Mangos</h2><div class="ulist"><ul><li><p>mangos written to fill need for illumos/golang</p></li><li><p>project to learn nanomsg protocols <strong>and</strong> golang</p></li><li><p>over time became more featureful than nanomsg itself</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>When mangos was written, illumos couldn&#8217;t use FFIs, so the golang
+binding for libnanomsg was a non-starter.  This turned out to be a good
+thing, because otherwise mangos, and nng, would not exist.</p></div></aside></section>
+<section id="problems_with_nanomsg"><h2>Problems with nanomsg</h2><div class="ulist"><ul><li><p>FSMs run amok</p></li><li><p>Not "easily" extensible</p></li><li><p>Followed POSIX API "mistakes"</p></li><li><p>Suboptimal scaling</p><div class="ulist"><ul><li><p>Single global processing thread</p></li><li><p>Hard-coded limits (e.g. on number of sockets)</p></li></ul></div></li><li><p>Extra system calls</p></li><li><p>Not coded for production use</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>We started by trying to add TLS support (via OpenSSL) to the existing
+library, but really failed.</p></div>
+<div class="paragraph"><p>The worse of the POSIX API mistakes are the cmsg API.  POSIX had to answer
+the needs of multiple vendors, and avoid breaking existing system call
+boundaries.  The result was a compromise.</p></div>
+<div class="paragraph"><p>Compromise: A solution that everyone hates.</p></div>
+<div class="paragraph"><p>A simple extensible funtion call interface is better.</p></div>
+<div class="paragraph"><p>There were some design directions towards supporting multiple processing
+threads in nanomsg, but no actual implementation there.</p></div></aside></section>
+<section id="enter_em_nng_em"><h2>Enter <em>nng</em></h2><div class="ulist"><ul><li><p>nanomsg-next-gen</p></li><li><p>Inspired by work on <em>mangos</em></p></li><li><p>Started as fully thread-based design</p></li><li><p>Discovered that user threads scale poorly ~everywhere</p></li><li><p>Redesigned backend upon new asynchronous I/O framework modeled on Windows</p></li><li><p>Broke away from slavish adherence to POSIX API</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>While <em>nng</em> has the same acryonym as "NaNomsg Garrett", that&#8217;s not an
+official meaning, and was only discovered after the "nng" name was settled
+upon.</p></div>
+<div class="paragraph"><p>The author was spoiles by having excellent scalable (10K+ threads at a time)
+kernel threads in <a href="http://www.illumos.org">illumos</a>.  Sadly experience shows
+that user implementations of threads everywhere else are horrible.</p></div>
+<div class="paragraph"><p>Microsoft can occasionally come up with a "right answer" (like a broken
+clock); the IOCP design in Windows is well thought out.</p></div>
+<div class="paragraph"><p>POSIX AIO is utterly useless, with broken or non-scalable implementations.
+(We think only <a href="http://www.illumos.org">illumos</a> has an implementation that
+is useful, and nobody uses even that.</p></div></aside></section>
+<section id="compatibility"><h2>Compatibility</h2><div class="ulist"><ul><li><p>All implementations are wire compatible (modulo specific features)</p></li><li><p>Protocols backed by "RFCs"</p></li><li><p><em>nng</em> offers both legacy compat API &amp; "modern" API</p></li><li><p>On some platforms, even <strong>ABI</strong> compatibility</p></li><li><p>Design goal is to support an entire ecosystem</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>Not all protocols are documented by RFCs <strong>yet</strong>.</p></div>
+<div class="paragraph"><p>ABI compatibility is an accident, and not guaranteed or documented.  Still it
+is useful for validating the port.  It may not be true on all platforms.</p></div></aside></section>
+<section id="reliable_by_design_nng"><h2>Reliable By Design (nng)</h2><div class="ulist"><ul><li><p>Never assert on anything other than gross programmer error</p></li><li><p>Hardened against malformed wire packets</p></li><li><p>Protections against DoS (e.g. overallocation)</p></li><li><p>Tunable limits for "interior" use cases</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p><em>nanomsg</em> was designed like a science experiment, with assertions for various
+system call errors, etc.  This inhibits portability, and was the source of
+many bug reports over the years.  Numerous cases still remain.</p></div>
+<div class="paragraph"><p>Likewise, its pretty easy to cause <em>nanomsg</em> to crap out by feeding it garbage.</p></div>
+<div class="paragraph"><p>The DoS protections we inherited from <em>mangos</em>, and were applied to both <em>nng</em>
+and <em>nanomsg</em>.</p></div></aside></section>
+<section id="embeddability_nng"><h2>Embeddability (nng)</h2><div class="ulist"><ul><li><p>Minimal dependencies</p></li><li><p>Clearly defined portability layer</p></li><li><p>Needs "thread" creation, locking, networking, and time APIs</p></li><li><p>Design supports coroutine based approach for "platforms"</p></li><li><p>Requires C99</p></li><li><p>VxWorks, FreeRTOS, etc. ports planned</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>We intend to support libdill, from the outset.  The reason we didn&#8217;t do
+that from the outset was that it is incompatible with "real" threading
+libraries.</p></div>
+<div class="paragraph"><p>Our approach also facilitates easy integration into event loop systems,
+while sitll allowing our own designs to be more linear internally.</p></div>
+<div class="paragraph"><p>In retrospect, maybe we could have built on top of libuv, but we believe
+our approach is more flexible.</p></div></aside></section>
+<section><section id="zerotier_transport_nng"><h2>ZeroTier Transport (nng)</h2><div class="ulist"><ul><li><p>Uses VL2 only (No IP addresses!)</p></li><li><p>Built on dev branch (libzerotiercore.a)</p></li><li><p>Supports persistent and ephemeral nodes.</p></li><li><p>Provides platform services (improved portability)</p></li><li><p>Bottom half uses UDPv4 and v6</p></li><li><p>Apps can resuse node multiple times</p></li><li><p>Apps can join multiple nodes &amp; networks</p></li><li><p>Supports federations (moons)</p></li></ul></div></section><section id="zerotier_packet_format"><h2>ZeroTier Packet Format</h2><div class="paragraph"><p>Header for all ZeroTier transport frames:</p></div>
+<div class="imageblock" style=""><img src="zerotier0-header.png" alt="zerotier0 header"></div>
+<aside class="notes"><div class="paragraph"><p>The intention is that a given application will have at least one
+ZT node that it exclusively controls.</p></div>
+<div class="paragraph"><p>This also avoids having to load any kernel modules, or change host OS
+stacks in anyway (like the SDK).</p></div>
+<div class="paragraph"><p>We might want to revisit this to use something like QUIC or KCP on top
+of the L2, and eliminate our own fragmentation/packet layer.</p></div></aside></section><section id="zerotier_data_frames"><h2>ZeroTier Data Frames</h2><div class="paragraph"><p>This is the payload for <code>DATA</code> frames.</p></div>
+<div class="imageblock" style=""><img src="zerotier%20format.png" alt="zerotier format"></div></section><section id="zerotier_connection_frames"><h2>ZeroTier Connection Frames</h2><div class="paragraph"><p>User data for connetion commands:</p></div>
+<div class="imageblock" style=""><img src="zerotier0-conn.png" alt="zerotier0 conn"></div>
+<aside class="notes"><div class="paragraph"><p>This allows the peer protocol (at the SP level) to be determined.</p></div></aside></section><section id="sample_zerotier_dialer"><h2>Sample ZeroTier Dialer</h2><div class="listingblock"><div class="content"><pre class="pygments highlight"><code class="c language-c"><span></span><span class="tok-n">nng_zt_register</span><span class="tok-p">();</span> <span class="tok-c1">// Register ZT transport</span>
+<span class="tok-n">nng_pair_open</span><span class="tok-p">(</span><span class="tok-o">&amp;</span><span class="tok-n">sock</span><span class="tok-p">);</span>
+<span class="tok-n">nng_dial</span><span class="tok-p">(</span><span class="tok-n">sock</span><span class="tok-p">,</span> <span class="tok-s">&quot;zt://fedcba9876.a09acf02337b057b:999&quot;</span><span class="tok-p">);</span> <i class="conum" data-value="1"></i><b>(1)</b></code></pre></div></div>
+<div class="colist arabic"><table><tr><td><i class="conum" data-value="1"></i><b>1</b></td><td>Port 999, node 0xfedcba9876, network a09acf02337b057b</td></tr></table></div></section></section>
+<section id="websocket_support"><h2>WebSocket Support</h2><div class="ulist"><ul><li><p>Original implementation is toylike</p><div class="ulist"><ul><li><p>No support for TLS</p></li><li><p>Only one server per TCP port (no port sharing)</p></li><li><p>Exclusive to SP use</p></li></ul></div></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>Legacy <em>nanomsg</em> didn&#8217;t even path discriminate, and was minimal printf()
+style header gen and trivial parser.  It&#8217;s a little better now, but still
+useless for sharing a single TCP port.  Historically it couldn&#8217;t cope
+with RFC compliant differences in behavior (e.g. in different browsers.)</p></div></aside></section>
+<section><section id="websocket_support_2"><h2>WebSocket Support</h2><div class="ulist"><ul><li><p>New implementation is full featured</p><div class="ulist"><ul><li><p>Inspired by mangos</p></li><li><p>TLS support</p></li><li><p>Full HTTP server and client</p></li><li><p>Multiple sockets can share a port (path discrimination)</p></li><li><p>Can support arbitrary headers, etc.</p></li></ul></div></li></ul></div><aside class="notes"><div class="paragraph"><p>Also we really need binary format frames because underlying protocol headers
+are binary format.</p></div>
+<div class="paragraph"><p>JS browser clients are responsible for managing all headers, semantics, etc.
+We really would like to have a JS library that provided full semantics here.</p></div>
+<div class="paragraph"><p>Btw, fully convinced that the WS authors were high when they came up with
+the speak (e.g. masking, use of SHA for header rewriting, etc.  It&#8217;s very
+ill-suited for non-browser use.)</p></div></aside></section><section id="http_server_support"><h2>HTTP Server Support</h2><div class="ulist"><ul><li><p>Server supports pluggable handlers</p><div class="ulist"><ul><li><p>Handlers for file, dir, and static content</p></li><li><p>Handler can "hijack" connection</p></li></ul></div></li><li><p>HTTP/1.0 and HTTP/1.1 only</p></li><li><p>Pluggable transport (TCP, TLSv1.2, etc.)</p></li><li><p>Written for WebSocket, but "public" API</p></li><li><p>Probably only useful for C and C++ apps.</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>The framework can be used to create REST API services, or to serve
+static content such as JS scripts that access the same SP addresses.</p></div>
+<div class="paragraph"><p>Other runtimes usually have superior, and more idiomatic, support for
+HTTP, and should be preferred when practical.  But probably not possible
+if true port sharing is required.</p></div>
+<div class="paragraph"><p>We might want to introduce a public API for such runtimes to pass an
+HTTP connection (transport) to the framework.  The low level glue is already
+there.</p></div>
+<div class="paragraph"><p>Hijacking a connection allows a custom handler to take over ownership
+of the connection, required for writing upgraders like websocket,
+HTTP/2, or similar.  Modeled on golang framework.</p></div></aside></section><section id="http_client_support"><h2>HTTP Client Support</h2><div class="ulist"><ul><li><p>Lower-level API support only at this point</p></li><li><p>HTTP/1.x only</p></li><li><p>No "convenience" methods (yet)</p></li><li><p>No auto support for proxies, redirects, etc.</p></li><li><p>And yet still can easily build all that on top</p></li><li><p>HTTP client auth (TLS) supported</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>We expect that some libcurl style methods for things like GET() may be
+appropriate here.</p></div>
+<div class="paragraph"><p>HTTP/2 could be interesting, but would require a lot of effort, and our
+goal is not to be a generic HTTP framework (yet).</p></div>
+<div class="paragraph"><p>Redirect support most likely to be useful here, since most famous sites
+use at least redirects from HTTP to HTTPS.  This needs some "thought".</p></div></aside></section></section>
+<section id="documentation"><h2>Documentation</h2><div class="ulist"><ul><li><p>RFCs</p></li><li><p>man pages</p></li><li><p>examples</p></li></ul></div></section>
+<section id="new_em_nng_em_capabilities"><h2>New <em>nng</em> capabilities</h2><div class="ulist"><ul><li><p>TLS</p></li><li><p>rich WebSocket</p></li><li><p>Rich HTTP</p></li><li><p>ZeroTier</p></li><li><p>Binding to port 0</p></li><li><p>Peer/pipe properties</p></li><li><p>Polyamorous/PairV1</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>Being able to determine the remote peer, and address or other properties
+like certificate, means we can start using richer authentication schemes.</p></div>
+<div class="paragraph"><p>Port 0 binding lets us ask the system to assign us a port, which we can
+determine afterwards.  This is useful for building self-configuring
+service-discovery based systems.</p></div>
+<div class="paragraph"><p>It also lets us discriminate behaviors based on <strong>who</strong> the peer is.
+For example, voting algorithms could prefer a peer that is closer in the
+network topology.</p></div></aside></section>
+<section id="test_suite"><h2>Test Suite</h2><div class="ulist"><ul><li><p>Uses CMake/CTest</p></li><li><p>Custom framwork inspired by GoConvey</p></li><li><p>Legacy tests imported for compat</p></li><li><p>Performance and scaling tests</p></li><li><p>Integrated with CI</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>Still a lot to do here.</p></div>
+<div class="paragraph"><p>The C-Convey framework (in its own repo now) has some unfortunate behaviors
+due to its dependency upon setjmp; reusing functions; test assertions
+don&#8217;t work well in subroutines.</p></div>
+<div class="paragraph"><p>The CI tests Windows and Linux, and includes code quality and coverage
+analysis, but there is opportunity to improve that further.</p></div></aside></section>
+<section id="project_status"><h2>Project Status</h2><div class="ulist"><ul><li><p><em>nanomsg</em> - actively supported, sustaining</p></li><li><p><em>mangos</em> - actively supported</p></li><li><p><em>nng</em> - beta ready, actively developed</p></li></ul></div></section>
+<section id="future_directions"><h2>Future Directions</h2><div class="ulist"><ul><li><p>Docs &amp; Examples</p></li><li><p>Statistics &amp; Observability</p></li><li><p>Transports (UDP, QUIC, KCP, TIPC, RoCE, SSH?)</p></li><li><p>Pure JavaScript implementation</p></li><li><p>ZeroMQ interop?</p></li><li><p>HTTP enhancements</p></li><li><p>Other TLS backends? (libressl? bearssl?)</p></li><li><p>API enhancements</p></li><li><p>Performance</p></li></ul></div>
+<aside class="notes"><div class="paragraph"><p>The observability/stats API is designed, but implementation
+work to be done.</p></div>
+<div class="paragraph"><p>RoCE and other RDMA style transports will need work to be zero-copy.</p></div>
+<div class="paragraph"><p>We&#8217;d like a commercial sponsor for the TIPC protocol work.
+Likewise, RDMA would best be done with a commercial sponsor.</p></div>
+<div class="paragraph"><p>API enhancements: config file support, scatter/gather message API,
+ZeroCopy to the OS</p></div>
+<div class="paragraph"><p>We&#8217;ve avoided premature optimization (we think), but its time to
+start focusing on this.</p></div></aside></section>
+<section><section id="thank_you"><h2>Thank You</h2></section><section id="resources"><h2>Resources</h2><div class="ulist"><ul><li><p><a href="http://www.nanomsg.org" class="bare">http://www.nanomsg.org</a></p></li><li><p><a href="https://github.com/nanomsg/nng" class="bare">https://github.com/nanomsg/nng</a></p></li><li><p><a href="https://github.com/go-mangos/mangos" class="bare">https://github.com/go-mangos/mangos</a></p></li><li><p><a href="mailto:nanomsg@freelists.org">nanomsg@freelists.org</a></p></li></ul></div></section></section></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/head.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/js/reveal.js"></script><script>// See https://github.com/hakimel/reveal.js#configuration for a full list of configuration options
+Reveal.initialize({
+  // Display controls in the bottom right corner
+  controls: true,
+  // Display a presentation progress bar
+  progress: true,
+  // Set a per-slide timing for speaker notes, null means none
+  defaultTiming: null,
+  // Display the page number of the current slide
+  slideNumber: false,
+  // Push each slide change to the browser history
+  history: false,
+  // Enable keyboard shortcuts for navigation
+  keyboard: true,
+  // Enable the slide overview mode
+  overview: true,
+  // Vertical centering of slides
+  center: true,
+  // Enables touch navigation on devices with touch input
+  touch: true,
+  // Loop the presentation
+  loop: false,
+  // Change the presentation direction to be RTL
+  rtl: false,
+  // Randomizes the order of slides each time the presentation loads
+  shuffle: false,
+  // Turns fragments on and off globally
+  fragments: true,
+  // Flags if the presentation is running in an embedded mode,
+  // i.e. contained within a limited portion of the screen
+  embedded: false,
+  // Flags if we should show a help overlay when the questionmark
+  // key is pressed
+  help: true,
+  // Flags if speaker notes should be visible to all viewers
+  showNotes: false,
+  // Global override for autolaying embedded media (video/audio/iframe)
+  // - null: Media will only autoplay if data-autoplay is present
+  // - true: All media will autoplay, regardless of individual setting
+  // - false: No media will autoplay, regardless of individual setting
+  autoPlayMedia: null,
+  // Number of milliseconds between automatically proceeding to the
+  // next slide, disabled when set to 0, this value can be overwritten
+  // by using a data-autoslide attribute on your slides
+  autoSlide: 0,
+  // Stop auto-sliding after user input
+  autoSlideStoppable: true,
+  // Enable slide navigation via mouse wheel
+  mouseWheel: false,
+  // Hides the address bar on mobile devices
+  hideAddressBar: true,
+  // Opens links in an iframe preview overlay
+  previewLinks: false,
+  // Theme (e.g., beige, black, league, night, serif, simple, sky, solarized, white)
+  // NOTE setting the theme in the config no longer works in reveal.js 3.x
+  //theme: Reveal.getQueryHash().theme || 'black',
+  // Transition style (e.g., none, fade, slide, convex, concave, zoom)
+  transition: Reveal.getQueryHash().transition || 'slide',
+  // Transition speed (e.g., default, fast, slow)
+  transitionSpeed: 'default',
+  // Transition style for full page slide backgrounds (e.g., none, fade, slide, convex, concave, zoom)
+  backgroundTransition: 'fade',
+  // Number of slides away from the current that are visible
+  viewDistance: 3,
+  // Parallax background image (e.g., "'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg'")
+  parallaxBackgroundImage: '',
+  // Parallax background size in CSS syntax (e.g., "2100px 900px")
+  parallaxBackgroundSize: '',
+
+  // The "normal" size of the presentation, aspect ratio will be preserved
+  // when the presentation is scaled to fit different resolutions. Can be
+  // specified using percentage units.
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around the content
+  margin: 0.1,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 1.5,
+
+  // Optional libraries used to extend on reveal.js
+  dependencies: [
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/zoom-js/zoom.js', async: true },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/notes/notes.js', async: true }
+  ]
+});</script></body></html>

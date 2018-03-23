@@ -1,0 +1,670 @@
+:customcss: css/nng.css
+= Scalability Protocols
+Garrett D'Amore, Staysail Systems, Inc.
+
+(nanomsg, nng, mangos, and other critters) +
+February 13, 2018
+
+== About Me
+
+* *Garrett D'Amore* +
+* CTO & Founder, Staysail Systems, Inc. +
+* Founder of http://www.illumos.org[illumos] +
+* BDFL _nanomsg_ & creator of _nng_, _mangos_ +
+
+
+== Scalability Protocols
+
+* Light-weight messaging layer
+* Solves recurring messaging problems
+* Liberally licensed
+* Embeddable & Portable (ANSI C)
+* Message-oriented
+* Brokerless
+
+== Alternatives
+
+* ZeroMQ
+* RabbitMQ
+* AMQP
+* MQTT
+* REST/HTTP
+* BSD sockets
+* Others...
+
+=== ZeroMQ
+
+Much has been written here.  Biggest turn offs to ZeroMQ
+are license and language, but some philosophical differences too.
+
+See http://nanomsg.org/documentation-zeromq.html for some of Martin's
+orgiinal thoughts.
+
+[NOTE.speaker]
+--
+Philosophical ones involve OO based API, insufficient design for
+threading, interface stability, extensibility, and polling approach.
+nanomsg represents an effort by Martin to correct what he perceived as
+mistakes in ZeroMQ.  Recall he is the creator of both projects.
+--
+
+=== Broker-based
+
+* RabbitMQ, AMQP require a broker, and a runtime (Java).
+
+=== MQTT
+
+MQTT is newer than nanomsg or ZeroMQ, and is intended for IoT
+use cases.  It lacks most of the flexibility and power, and is a very
+simple PUB/SUB model (generally over TCP).
+
+=== REST/HTTP API
+
+REST (and HTTP) expreses the simple RPC style (REQ/REP) paradigm well.  It
+does not support other patterns, and lacks any notion
+of automatic retry, reconnect, etc.
+
+HTTP can be useful with proxies to load-balance, etc. however.
+
+== SP Implementations
+
+* http://nanomsg.org[nanomsg] (original)
+* https://github.com/go-mangos/mangos[mangos] (golang)
+* https://nanomsg.github.com/nng[nng] (nanomsg-next-gen)
+* https://github.com/blabaere/scaproust[scaporust] (rust)
+* Many language FFIs (wrappers)
+
+== Why?
+
+- Developer friendly
+- Administrator friendly
+- Business friendly
+
+=== Buzzwords
+
+- Brokerless
+- Lightweight
+- Securable
+- Reliable
+- Performant
+- Scalable
+
+=== Other Buzzwords
+
+- Open Source
+- Observable (TBD)
+- Composable
+- Separation of Code & Config
+
+== Broker vs. Brokerless
+
+[%header%autowidth]
+|===
+||Broker|Brokerless
+|Separate Daemon|Yes|[green]##No##
+|Runtime Requirements|Usually|[green]#Rare#
+|Persistent State|Yes|[red]#No#
+|Database Required|Frequently|[green]#No#
+|Extra Administration|Yes|[green]#Rarely#
+|===
+
+=== Moral
+
+_If you absolutely need persistent state, a broker is required.
+For all other cases, brokerless is better._
+
+== Light-weight
+
+* ANSI C
+** Except _mangos_ (golang) and _scaporust_ (rust)
+** _nng_ uses C99
+* Minimal *optional* external dependencies
+* Zero *required* external dependencies
+* Minimizable (_nng_ only)
+
+== Optional Dependencies
+
+For _nng_ only:
+
+ARM mbedTLS:: For TLS and wss transports.  Apache licensed.
+ZeroTierOne:: For zt transport; GPL, dev branch only
+
+== Minimizable
+
+Every transport and every protocol can be disabled and omitted from
+the library.  Furthermore, vanilla HTTP and TLS support may be removed.
+
+== Developer Friendly
+
+* Started with familiar POSIX API (send/recv, file descriptor based)
+** Even POSIX API is sometimes inconvenient.
+** Socket options style API for tunables.
+* Free developer from managing connections, reconnects, retries, etc.
+* Addresses are just URLs
+
+== Administrator Friendly
+
+* Brokerless!
+* No external runtime or other dependencies
+** Except for optional ZeroTier or mbedTLS (_nng_)
+* Device API supports proxies, concentrators, etc.
+* URL configuration for endpoint addresses
+** Some transports need extra config
+* Designed for scalability
+
+[NOTE.speaker]
+--
+We are looking at ways to handle configuration apart from code for
+things like security certificates.  Configuration files, environment
+variables, and similar are being explored.
+--
+
+== Business Friendly
+
+* Liberal (MIT) license
+* mbedTLS dependency uses Apache license
+* No other dependencies
+* Commercial support available
+* Commercially sponsored
+
+[NOTE.speaker]
+--
+Apache license is generally considered liberal.  ZeroTier's GPL
+license can be problematic for embedded use cases, etc.
+
+Remember that one of the motivations behind _nanomsg_ was that
+ZeroMQ's GPL license is deemed too onerous for many applications.
+--
+
+== Securable (nng)
+
+* TLSv1.2 support availble (both TCP and websocket)
+* https://zerotier.com[ZeroTier] (!) for _nng_
+* Hardened against DoS and other protocol attacks
+* Different transport options provide flexibility
+* Device proxies 
+** Hardened exterior
+** Inspectable interior
+
+== Reliable
+
+* Never assert except on gross programmer error
+* All system call return codes checked
+* Built-in retries & reconnects
+* Brokerless (no broker to fail)
+* Multipath capable
+
+[NOTE.speaker]
+--
+The first two of these are applicable only to _nng_.
+--
+
+== Performant
+
+* Optimal use of OS facilities
+* Tunables (throughput vs latency)
+* Nagle (on or off)
+* Buffer loaning to reduce data copies
+* Minimal use of extra system calls
+* No premature optimization
+
+[NOTE.speaker]
+--
+We know of people using this to coordinate FIX trading for "high frequency"
+currency trading.  Rationale here is reduced latency.
+
+Nagle almost never makes sense in an SP topology; but we really need
+good scatter/gather support to keep single messages in the same
+TCP segment.  This is one area where mangos / golang suffers.
+--
+ 
+== Scalable
+
+* Thread scaling to utilize multiple cores
+* Designed to support system aware pollers (kqueue, epoll, IOCP, etc.)
+* C10K capable (tested) (_nng_, _mangos_)
+* Device framework (horizontal scaling)
+* _nng_ already outperforms _libnanomsg_ (Win32)
+
+== Transports
+
+* TCP
+* IPC
+* inproc
+* websocket (with TLS on _mangos_ and _nng_)
+* TLS (_mangos_ and _nng_ only)
+* ZeroTier (_nng_ only)
+* QUIC (3rd party developed, mangos only)
+* UDP, KCP.... others proposed
+
+== Patterns (Protocols)
+
+* Req/Rep
+* Pub/Sub
+* Bus
+* Pipeline (Push/Pull)
+* Survey
+* Pair
+* Polyamorous Pair (_nng_ only)
+* Star (_mangos_ only)
+
+== Composable Architecture
+
+* "Device" layer
+* Acts like a proxy
+* Can cross transport boundaries
+* Can be concentrator
+* Transparent to applications
+
+== History Lesson (101)
+
+* BSD sockets begat _ZeroMQ_
+* _ZeroMQ_ begat _nanomsg_
+* _nanomsg_ begat _mangos_
+* _mangos_ begat _nng_
+
+=== History (301)
+
+* ZeroMQ's use of GPL and C++ deemed distasteful.
+* ZeroMQ's lack of thread-safety an inhibitor.
+* Martin Sustrik and Peter Hintjens had a falling out.
+
+=== PostModern History
+
+* Garrett wrote mangos
+* Martin lost interest
+* Garrett started maintaining
+* Garrett stepped away ... for a while
+* Garrett took back over as BDFL
+* Garrett started the _nng_ effort
+
+== Mangos
+
+* mangos written to fill need for illumos/golang
+* project to learn nanomsg protocols *and* golang
+* over time became more featureful than nanomsg itself
+
+[NOTE.speaker]
+--
+When mangos was written, illumos couldn't use FFIs, so the golang
+binding for libnanomsg was a non-starter.  This turned out to be a good
+thing, because otherwise mangos, and nng, would not exist.
+--
+
+== Problems with nanomsg
+
+* FSMs run amok
+* Not "easily" extensible
+* Followed POSIX API "mistakes"
+* Suboptimal scaling
+** Single global processing thread
+** Hard-coded limits (e.g. on number of sockets)
+* Extra system calls
+* Not coded for production use
+
+[NOTE.speaker]
+--
+We started by trying to add TLS support (via OpenSSL) to the existing
+library, but really failed.
+
+The worse of the POSIX API mistakes are the cmsg API.  POSIX had to answer
+the needs of multiple vendors, and avoid breaking existing system call
+boundaries.  The result was a compromise.
+
+Compromise: A solution that everyone hates.
+
+A simple extensible funtion call interface is better.
+
+There were some design directions towards supporting multiple processing
+threads in nanomsg, but no actual implementation there.
+--
+
+== Enter _nng_
+
+* nanomsg-next-gen
+* Inspired by work on _mangos_
+* Started as fully thread-based design
+* Discovered that user threads scale poorly ~everywhere
+* Redesigned backend upon new asynchronous I/O framework modeled on Windows
+* Broke away from slavish adherence to POSIX API
+
+[NOTE.speaker]
+--
+While _nng_ has the same acryonym as "NaNomsg Garrett", that's not an
+official meaning, and was only discovered after the "nng" name was settled
+upon.
+
+The author was spoiles by having excellent scalable (10K+ threads at a time)
+kernel threads in http://www.illumos.org[illumos].  Sadly experience shows
+that user implementations of threads everywhere else are horrible.
+
+Microsoft can occasionally come up with a "right answer" (like a broken
+clock); the IOCP design in Windows is well thought out.
+
+POSIX AIO is utterly useless, with broken or non-scalable implementations.
+(We think only http://www.illumos.org[illumos] has an implementation that
+is useful, and nobody uses even that.
+--
+
+== Compatibility
+
+* All implementations are wire compatible (modulo specific features)
+* Protocols backed by "RFCs"
+* _nng_ offers both legacy compat API & "modern" API
+* On some platforms, even *ABI* compatibility
+* Design goal is to support an entire ecosystem
+
+[NOTE.speaker]
+--
+Not all protocols are documented by RFCs *yet*.
+
+ABI compatibility is an accident, and not guaranteed or documented.  Still it
+is useful for validating the port.  It may not be true on all platforms.
+--
+
+== Reliable By Design (nng)
+
+* Never assert on anything other than gross programmer error
+* Hardened against malformed wire packets
+* Protections against DoS (e.g. overallocation)
+* Tunable limits for "interior" use cases
+
+[NOTE.speaker]
+--
+_nanomsg_ was designed like a science experiment, with assertions for various
+system call errors, etc.  This inhibits portability, and was the source of
+many bug reports over the years.  Numerous cases still remain.
+
+Likewise, its pretty easy to cause _nanomsg_ to crap out by feeding it garbage.
+
+The DoS protections we inherited from _mangos_, and were applied to both _nng_
+and _nanomsg_.
+--
+== Embeddability (nng)
+
+* Minimal dependencies
+* Clearly defined portability layer
+* Needs "thread" creation, locking, networking, and time APIs
+* Design supports coroutine based approach for "platforms"
+* Requires C99
+* VxWorks, FreeRTOS, etc. ports planned
+
+[NOTE.speaker]
+--
+We intend to support libdill, from the outset.  The reason we didn't do
+that from the outset was that it is incompatible with "real" threading
+libraries.
+
+Our approach also facilitates easy integration into event loop systems,
+while sitll allowing our own designs to be more linear internally.
+
+In retrospect, maybe we could have built on top of libuv, but we believe
+our approach is more flexible.
+--
+
+== ZeroTier Transport (nng)
+
+* Uses VL2 only (No IP addresses!)
+* Built on dev branch (libzerotiercore.a)
+* Supports persistent and ephemeral nodes.
+* Provides platform services (improved portability)
+* Bottom half uses UDPv4 and v6
+* Apps can resuse node multiple times
+* Apps can join multiple nodes & networks
+* Supports federations (moons)
+
+=== ZeroTier Packet Format
+
+Header for all ZeroTier transport frames:
+
+[packetdiag,zerotier0-header]
+----
+{
+   colwidth = 32
+
+0-7: op
+8-15: flags
+16-31: version
+32-39: reserved
+40-63: dst port
+64-71: reserved
+72-95: src port
+96-127: payload ... [colheight = 3]
+}
+----
+
+[NOTE.speaker]
+--
+The intention is that a given application will have at least one
+ZT node that it exclusively controls.
+
+This also avoids having to load any kernel modules, or change host OS
+stacks in anyway (like the SDK).
+
+We might want to revisit this to use something like QUIC or KCP on top
+of the L2, and eliminate our own fragmentation/packet layer.
+--
+
+=== ZeroTier Data Frames
+
+This is the payload for `DATA` frames.
+
+[packetdiag,"zerotier format"]
+----
+{
+colwidth = 32
+0-15: message ID
+16-31: fragment size
+32-47: fragment number
+48-63: total fragments
+64-95: user data...
+}
+----
+
+=== ZeroTier Connection Frames
+
+User data for connetion commands:
+
+[packetdiag,zerotier0-conn]
+----
+{
+colwidth = 32
+0-16: SP protocol ID
+}
+----
+
+[NOTE.speaker]
+--
+This allows the peer protocol (at the SP level) to be determined.
+--
+
+=== Sample ZeroTier Dialer
+
+[source,c]
+----
+nng_zt_register(); // Register ZT transport
+nng_pair_open(&sock);
+nng_dial(sock, "zt://fedcba9876.a09acf02337b057b:999"); // <1>
+----
+<1> Port 999, node 0xfedcba9876, network a09acf02337b057b
+
+== WebSocket Support
+
+* Original implementation is toylike
+** No support for TLS
+** Only one server per TCP port (no port sharing)
+** Exclusive to SP use
+
+[NOTE.speaker]
+--
+Legacy _nanomsg_ didn't even path discriminate, and was minimal printf()
+style header gen and trivial parser.  It's a little better now, but still
+useless for sharing a single TCP port.  Historically it couldn't cope
+with RFC compliant differences in behavior (e.g. in different browsers.)
+--
+
+== WebSocket Support
+
+* New implementation is full featured
+** Inspired by mangos
+** TLS support
+** Full HTTP server and client
+** Multiple sockets can share a port (path discrimination)
+** Can support arbitrary headers, etc.
+
+[NOTE.speaker]
+--
+Also we really need binary format frames because underlying protocol headers
+are binary format.
+
+JS browser clients are responsible for managing all headers, semantics, etc.
+We really would like to have a JS library that provided full semantics here.
+
+Btw, fully convinced that the WS authors were high when they came up with
+the speak (e.g. masking, use of SHA for header rewriting, etc.  It's very
+ill-suited for non-browser use.)
+--
+
+=== HTTP Server Support
+
+* Server supports pluggable handlers
+** Handlers for file, dir, and static content
+** Handler can "hijack" connection
+* HTTP/1.0 and HTTP/1.1 only
+* Pluggable transport (TCP, TLSv1.2, etc.)
+* Written for WebSocket, but "public" API
+* Probably only useful for C and C++ apps.
+
+[NOTE.speaker]
+--
+The framework can be used to create REST API services, or to serve
+static content such as JS scripts that access the same SP addresses.
+
+Other runtimes usually have superior, and more idiomatic, support for
+HTTP, and should be preferred when practical.  But probably not possible
+if true port sharing is required.
+
+We might want to introduce a public API for such runtimes to pass an
+HTTP connection (transport) to the framework.  The low level glue is already
+there.
+
+Hijacking a connection allows a custom handler to take over ownership
+of the connection, required for writing upgraders like websocket,
+HTTP/2, or similar.  Modeled on golang framework.
+--
+
+=== HTTP Client Support
+
+* Lower-level API support only at this point
+* HTTP/1.x only
+* No "convenience" methods (yet)
+* No auto support for proxies, redirects, etc.
+* And yet still can easily build all that on top
+* HTTP client auth (TLS) supported
+
+[NOTE.speaker]
+--
+We expect that some libcurl style methods for things like GET() may be
+appropriate here.
+
+HTTP/2 could be interesting, but would require a lot of effort, and our
+goal is not to be a generic HTTP framework (yet).
+
+Redirect support most likely to be useful here, since most famous sites
+use at least redirects from HTTP to HTTPS.  This needs some "thought".
+--
+
+== Documentation
+
+* RFCs
+* man pages
+* examples
+
+== New _nng_ capabilities
+
+* TLS
+* rich WebSocket
+* Rich HTTP
+* ZeroTier
+* Binding to port 0
+* Peer/pipe properties
+* Polyamorous/PairV1
+
+[NOTE.speaker]
+--
+Being able to determine the remote peer, and address or other properties
+like certificate, means we can start using richer authentication schemes.
+
+Port 0 binding lets us ask the system to assign us a port, which we can
+determine afterwards.  This is useful for building self-configuring
+service-discovery based systems.
+
+It also lets us discriminate behaviors based on *who* the peer is.
+For example, voting algorithms could prefer a peer that is closer in the
+network topology.
+--
+
+== Test Suite
+
+* Uses CMake/CTest
+* Custom framwork inspired by GoConvey
+* Legacy tests imported for compat
+* Performance and scaling tests
+* Integrated with CI
+
+[NOTE.speaker]
+--
+Still a lot to do here.
+
+The C-Convey framework (in its own repo now) has some unfortunate behaviors
+due to its dependency upon setjmp; reusing functions; test assertions
+don't work well in subroutines.
+
+The CI tests Windows and Linux, and includes code quality and coverage
+analysis, but there is opportunity to improve that further.
+--
+
+== Project Status
+
+* _nanomsg_ - actively supported, sustaining
+* _mangos_ - actively supported
+* _nng_ - beta ready, actively developed
+
+== Future Directions
+
+* Docs & Examples
+* Statistics & Observability
+* Transports (UDP, QUIC, KCP, TIPC, RoCE, SSH?)
+* Pure JavaScript implementation
+* ZeroMQ interop?
+* HTTP enhancements
+* Other TLS backends? (libressl? bearssl?)
+* API enhancements
+* Performance
+
+[NOTE.speaker]
+--
+The observability/stats API is designed, but implementation
+work to be done.
+
+RoCE and other RDMA style transports will need work to be zero-copy.
+
+We'd like a commercial sponsor for the TIPC protocol work.
+Likewise, RDMA would best be done with a commercial sponsor.
+
+API enhancements: config file support, scatter/gather message API,
+ZeroCopy to the OS
+
+We've avoided premature optimization (we think), but its time to 
+start focusing on this.
+--
+
+== Thank You
+
+=== Resources
+
+* http://www.nanomsg.org
+* https://github.com/nanomsg/nng
+* https://github.com/go-mangos/mangos
+* nanomsg@freelists.org
+

@@ -1,0 +1,8 @@
+Copyright 2018 Staysail Systems, Inc.
+
+This is a presentation a gave a while ago about NNG.
+
+It uses asciidoctor and reveal.js.
+
+Feel free to use this as a template for your own work,
+but please don't reuse this content without prior permission.
